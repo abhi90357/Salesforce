@@ -1,0 +1,28 @@
+trigger Noofcontacts on Contact (after insert,after update,after delete) {
+	Set<Id> idset=new Set<Id>();
+    List<Account> acclist=new List<Account>();
+    if(trigger.isInsert || trigger.isUpdate)
+    {
+        for(Contact con:trigger.new)
+        idset.add(con.AccountId);
+    }
+    
+    if(trigger.isDelete)
+    {
+        for(Contact con:trigger.old)
+        idset.add(con.AccountId);
+    }
+    
+    List<Account> aclist=[select Id,Name,(select Id from Contacts) from Account where Id=:idset];
+    for(Account acc:aclist)
+    {
+    Integer count=acc.contacts.size();
+    acc.Number_of_Contacts__c=count;
+    acclist.add(acc);
+    }
+    
+    if(acclist!=null)
+    {
+        update acclist;
+    }
+}
