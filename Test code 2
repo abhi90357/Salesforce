@@ -1,0 +1,96 @@
+LIGHTNING APP
+
+<aura:application extends="force:slds">
+    <c:listofAccounts/>
+</aura:application>
+
+
+CHILD COMPONENT
+
+<aura:component implements="flexipage:availableForAllPageTypes,flexipage:availableForRecordHome,force:hasRecordId,forceCommunity:availableForAllPageTypes" access="global" >
+	<aura:attribute name="accountName" type="String" />
+
+    <aura:attribute name="accountNumber" type="String" />   
+    
+    <aura:attribute name="billingAddress" type="String" />  
+
+  <div class="demo-only" style="width: 30rem;">
+
+    <article class="slds-tile">
+
+        <h3 class="slds-tile__title slds-truncate" title="Accounts"><a href="javascript:void(0);">Accounts</a></h3>
+
+        <div class="slds-tile__detail">
+
+            <dl class="slds-list_horizontal slds-wrap">
+
+                <dt class="slds-item_label slds-text-color_weak slds-truncate" title="First Label">Account Name:</dt>
+
+                <dd class="slds-item_detail slds-truncate" title="Description for first label">{!v.accountName}</dd>
+                
+                <dt class="slds-item_label slds-text-color_weak slds-truncate" title="Second Label">Account Number:</dt>
+
+                <dd class="slds-item_detail slds-truncate" title="Description for second label">{!v.accountNumber}</dd>
+
+                <dt class="slds-item_label slds-text-color_weak slds-truncate" title="Third Label">Address:</dt>
+
+                <dd class="slds-item_detail slds-truncate" title="Description for Third label">{!v.billingAddress}</dd>           
+
+                </dl>
+
+    </div>
+
+    </article>
+
+  </div>
+</aura:component>
+
+
+
+PARENT COMPONENT
+
+<aura:component implements="flexipage:availableForAllPageTypes" access="global" controller="fetchAccountDetails">
+	<aura:attribute name="accountList" type="account[]" />
+
+                <aura:handler name="init" value="{!this}" action="{!c.doInit}" />   
+
+     <aura:iteration items="{!v.accountList}" var="item">
+
+         <c:NewAccountCard accountName="{!item.Name}" accountNumber="{!item.AccountNumber}" billingAddress="{!item.BillingAddress}"  />
+
+         <br/>
+
+    </aura:iteration>
+</aura:component>
+
+
+APEX CONTROLLER CLASS
+
+public class fetchAccountDetails {
+@AuraEnabled
+
+    public static list<Account> fetchAccountList(){
+
+        return [select Id, Name, AccountNumber, BillingAddress from Account limit 10];             
+
+    }
+}
+
+
+PARENT COMPONENT CONTROLLER 
+
+({
+	doInit : function(component, event, helper) {
+
+                                var action = component.get("c.fetchAccountList");       
+
+        action.setCallback(this, function(data){
+
+            component.set("v.accountList",data.getReturnValue());
+
+        });       
+
+        $A.enqueueAction(action);
+
+                }
+})
